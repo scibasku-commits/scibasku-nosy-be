@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pregunta a Giora — Nosy Be</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0a1628;
+  --navy-light: #132039;
+  --gold: #d4af37;
+  --gold-dim: rgba(212,175,55,0.2);
+  --cyan: #1fb4d1;
+  --white: #ffffff;
+  --text: #e0e6ed;
+  --text-dim: #8a9bb5;
+  --border: rgba(255,255,255,0.08);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Inter',sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.chat-wrapper { max-width: 650px; width: 100%; }
+h2 { font-family:'Playfair Display',serif; color:var(--white); font-size:1.5rem; text-align:center; margin-bottom:4px; }
+.subtitle { text-align:center; color:var(--gold); font-size:0.9rem; margin-bottom:20px; }
+.chat-box { background:var(--navy-light); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+.chat-header { background:linear-gradient(135deg, var(--navy-light), rgba(212,175,55,0.1)); padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.chat-header-title { font-weight:700; color:var(--white); font-size:1rem; }
+.chat-header-brand { font-size:0.75rem; color:var(--gold); background:var(--gold-dim); padding:3px 10px; border-radius:10px; }
+.chat-messages { padding:20px; min-height:280px; }
+.chat-welcome { text-align:center; padding:20px; color:var(--text-dim); line-height:1.6; }
+.chat-welcome .wave { font-size:2rem; display:block; margin-bottom:8px; }
+.chat-welcome strong { display:block; color:var(--white); font-size:1.1rem; margin-bottom:6px; }
+.chat-suggestions { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:16px; }
+.chat-chip { background:var(--gold-dim); color:var(--gold); padding:8px 16px; border-radius:20px; font-size:0.8rem; font-weight:500; cursor:pointer; transition:all .3s; border:1px solid transparent; }
+.chat-chip:hover { background:var(--gold); color:var(--navy); transform:translateY(-1px); }
+.msg { margin-top:12px; display:flex; gap:10px; animation: fadeIn 0.3s ease; }
+.msg-bot { flex-direction:row; }
+.msg-user { flex-direction:row-reverse; }
+.msg-avatar { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+.msg-bot .msg-avatar { background:var(--gold-dim); }
+.msg-user .msg-avatar { background:rgba(31,180,209,0.2); }
+.msg-bubble { max-width:80%; padding:12px 16px; border-radius:16px; font-size:0.9rem; line-height:1.5; }
+.msg-bot .msg-bubble { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text); border-top-left-radius:4px; }
+.msg-user .msg-bubble { background:var(--gold-dim); color:var(--gold); border-top-right-radius:4px; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.typing { display:flex; gap:4px; padding:8px 16px; }
+.typing span { width:6px; height:6px; background:var(--text-dim); border-radius:50%; animation:blink 1.4s infinite; }
+.typing span:nth-child(2) { animation-delay:0.2s; }
+.typing span:nth-child(3) { animation-delay:0.4s; }
+@keyframes blink { 0%,60%,100%{opacity:0.3} 30%{opacity:1} }
+.chat-input-wrap { display:flex; border-top:1px solid var(--border); }
+.chat-input { flex:1; padding:14px 18px; background:transparent; border:none; color:var(--white); font-size:0.9rem; font-family:inherit; outline:none; }
+.chat-input::placeholder { color:var(--text-dim); }
+.chat-send { background:var(--gold); color:var(--navy); border:none; padding:14px 24px; font-weight:700; cursor:pointer; font-family:inherit; font-size:0.9rem; transition:background .3s; }
+.chat-send:hover { background:#e8c84a; }
+.wa-section { text-align:center; margin-top:20px; }
+.wa-section p { color:var(--text-dim); font-size:0.85rem; margin-bottom:10px; }
+.btn-wa { display:inline-flex; align-items:center; gap:8px; background:#25d366; color:white; padding:12px 28px; border-radius:30px; font-weight:700; text-decoration:none; font-size:0.9rem; transition:all .3s; }
+.btn-wa:hover { background:#20bd5a; transform:translateY(-2px); box-shadow:0 6px 20px rgba(37,211,102,0.3); }
+@media(max-width:600px) { body { padding:12px; } .chat-messages { min-height:220px; } }
+</style>
+</head>
+<body>
+<div class="chat-wrapper">
+  <h2>¿Tienes dudas? Pregunta al experto</h2>
+  <p class="subtitle">42 años organizando viajes de buceo. Sin filtros.</p>
+  <div class="chat-box">
+    <div class="chat-header">
+      <span class="chat-header-title">Giora & Scibasku</span>
+      <span class="chat-header-brand">Experto en Nosy Be</span>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-welcome">
+        <span class="wave">🌊</span>
+        <strong>Hola, soy Giora</strong>
+        42 años organizando viajes de buceo. Pregúntame lo que quieras sobre Nosy Be.
+      </div>
+      <div class="chat-suggestions" id="suggestions">
+        <div class="chat-chip" onclick="askChip(this)">¿Mejor época para bucear?</div>
+        <div class="chat-chip" onclick="askChip(this)">¿Qué habitación me recomiendas?</div>
+        <div class="chat-chip" onclick="askChip(this)">¿Puedo combinar buceo y pesca?</div>
+        <div class="chat-chip" onclick="askChip(this)">¿Necesito visado?</div>
+        <div class="chat-chip" onclick="askChip(this)">¿Qué excursiones hay?</div>
+      </div>
+    </div>
+    <div class="chat-input-wrap">
+      <input type="text" class="chat-input" id="chatInput" placeholder="Escribe tu pregunta sobre Nosy Be..." onkeypress="if(event.key==='Enter')sendMsg()">
+      <button class="chat-send" onclick="sendMsg()">Enviar</button>
+    </div>
+  </div>
+  <div class="wa-section">
+    <p>¿Prefieres contacto directo?</p>
+    <a href="https://wa.me/34619401041?text=Hola%20Giora%2C%20me%20interesa%20Nosy%20Be%20Madagascar" class="btn-wa" target="_blank">📱 Habla con Giora por WhatsApp</a>
+  </div>
+</div>
+<script>
+const KB = {
+  'mejor época': 'La mejor época para bucear en Nosy Be es de septiembre a diciembre — visibilidad de 25-40m, agua a 28°C, mantas y tiburones ballena entre septiembre y noviembre. Evita enero-marzo (ciclones) y junio-agosto (agua fría, 23°C).',
+  'habitación': 'Depende de lo que busques. Para parejas: Standard (patio/piscina, 76€/noche). Si quieres terraza privada: Superior (102€). Para familias o estancias largas: Studio Superior Villa con piscina y cocina (106€). Las Premium son correctas pero tienen vistas a la calle.',
+  'buceo y pesca': 'Sí, se combinan perfectamente. Buceo por la mañana (2 inmersiones con Oceane\'s Dream) y pesca por la tarde — o al revés. En una semana puedes hacer 5 días de buceo y 2-3 salidas de pesca sin problema.',
+  'visado': 'Necesitas visado. Se tramita online antes del viaje (eVisa) o a la llegada en el aeropuerto de Fascene. Cuesta unos 35€ para 30 días. Pasaporte con 6 meses de validez mínima. Vacuna de fiebre amarilla recomendada.',
+  'excursiones': 'Hay de todo: Nosy Komba (lémures que comen de tu mano), Mont Passot (atardecer épico), Reserva de Lokobe (selva primitiva), Nosy Iranja (dos islas unidas por banco de arena — día completo imprescindible), Hell-Ville (mercado local), destilería de Ylang Ylang.',
+  'precio': 'El programa base empieza en 1.895€ por persona en habitación doble Standard. Incluye vuelos, transfers, 7 noches y 5 días de buceo (10 inmersiones). Usa la calculadora para ajustar habitación, régimen y extras.',
+  'vuelos': 'Ethiopian Airlines vía Addis Abeba — es la mejor opción desde España. Equipaje facturado y maleta de buceo incluidos en nuestro programa.',
+  'hotel': 'Hotel Résidence Sarimanok en Ambatoloaka. Estilo contemporáneo, frente al mar. Piscina, restaurante Batumoch (cocina malgache-francesa), spa, boutique. Centro de buceo Oceane\'s Dream PADI 5★ a dos pasos. No es un resort — es tu base de operaciones.',
+  'buceo': 'Oceane\'s Dream — centro PADI 5★ con más de 20 años en la isla. 4 zonas de buceo: archipiélago interior (principiantes), Nosy Tanikely (reserva marina), Banc de l\'Étoile (pelágicos) y Mitsio (expediciones avanzadas). Nitrox disponible.'
+};
+
+function findAnswer(q) {
+  q = q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  for (let [key, val] of Object.entries(KB)) {
+    let k = key.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (q.includes(k)) return val;
+  }
+  if (q.match(/epoca|cuando|temporada|mes/)) return KB['mejor época'];
+  if (q.match(/habit|room|aloj|dormir|villa|studio/)) return KB['habitación'];
+  if (q.match(/pesca|fish|combin/)) return KB['buceo y pesca'];
+  if (q.match(/visa|pasaporte|documento|vacuna/)) return KB['visado'];
+  if (q.match(/excur|tour|visit|ver|hacer|lemur|iranja/)) return KB['excursiones'];
+  if (q.match(/preci|cost|cuanto|tarifa|pagar|presu/)) return KB['precio'];
+  if (q.match(/vuelo|avion|volar|airline|ethiop/)) return KB['vuelos'];
+  if (q.match(/hotel|sarim|batumoch|piscina|restau/)) return KB['hotel'];
+  if (q.match(/buce|dive|inmers|padi|oceane|nitrox|manta|tiburon/)) return KB['buceo'];
+  return 'Buena pregunta. Para darte la mejor respuesta sobre esto, escríbeme directamente por WhatsApp — así puedo personalizar la información para tu caso concreto. 42 años de experiencia no caben en un chatbot 😉';
+}
+
+const msgs = document.getElementById('chatMessages');
+function addMsg(text, type) {
+  const div = document.createElement('div');
+  div.className = 'msg msg-' + type;
+  const avatar = type === 'bot' ? '🌊' : '👤';
+  div.innerHTML = '<div class="msg-avatar">' + avatar + '</div><div class="msg-bubble">' + text + '</div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  resizeParent();
+}
+function showTyping() {
+  const div = document.createElement('div');
+  div.className = 'msg msg-bot';
+  div.id = 'typing';
+  div.innerHTML = '<div class="msg-avatar">🌊</div><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function hideTyping() { const t = document.getElementById('typing'); if (t) t.remove(); }
+function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const q = input.value.trim();
+  if (!q) return;
+  const welcome = msgs.querySelector('.chat-welcome');
+  if (welcome) welcome.style.display = 'none';
+  const sug = document.getElementById('suggestions');
+  if (sug) sug.style.display = 'none';
+  addMsg(q, 'user');
+  input.value = '';
+  showTyping();
+  setTimeout(() => { hideTyping(); addMsg(findAnswer(q), 'bot'); }, 800 + Math.random() * 1200);
+}
+function askChip(el) { document.getElementById('chatInput').value = el.textContent; sendMsg(); }
+function resizeParent() {
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'scibasku-chat-height', height: document.body.scrollHeight + 40 }, '*');
+  }
+}
+document.addEventListener('DOMContentLoaded', resizeParent);
+</script>
+</body>
+</html>
