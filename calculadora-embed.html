@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora Nosy Be — Scibasku</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0a1628;
+  --navy-light: #132039;
+  --gold: #d4af37;
+  --gold-dim: rgba(212,175,55,0.2);
+  --cyan: #1fb4d1;
+  --white: #ffffff;
+  --text: #e0e6ed;
+  --text-dim: #8a9bb5;
+  --card-bg: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Inter',sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  padding: 20px;
+  min-height: 100vh;
+}
+.room-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:24px; }
+.room-card { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; overflow:hidden; transition:border-color .3s; }
+.room-card:hover { border-color:var(--gold); }
+.room-card-img { background:var(--navy-light); padding:20px; text-align:center; font-size:1.5rem; color:var(--text-dim); min-height:80px; display:flex; align-items:center; justify-content:center; }
+.room-card-body { padding:12px; }
+.room-card-body h4 { font-family:'Playfair Display',serif; color:var(--white); font-size:0.95rem; margin-bottom:4px; }
+.room-meta { font-size:0.75rem; color:var(--text-dim); margin-bottom:6px; }
+.room-price { color:var(--gold); font-size:1.1rem; font-weight:700; margin-bottom:6px; }
+.room-price span { font-size:0.7rem; font-weight:400; color:var(--text-dim); }
+.room-features { display:flex; gap:4px; flex-wrap:wrap; }
+.room-feat { background:var(--gold-dim); color:var(--gold); font-size:0.65rem; padding:2px 6px; border-radius:10px; font-weight:600; }
+.calc-section { background:var(--navy-light); border:1px solid var(--border); border-radius:16px; padding:24px; margin-top:8px; }
+.calc-section h3 { font-family:'Playfair Display',serif; color:var(--gold); font-size:1.3rem; margin-bottom:16px; }
+.calc-label { display:block; font-size:0.8rem; color:var(--text-dim); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+.calc-select, .calc-input { width:100%; padding:12px 14px; background:var(--navy); border:1px solid var(--border); border-radius:10px; color:var(--white); font-size:0.95rem; font-family:inherit; appearance:none; -webkit-appearance:none; cursor:pointer; transition:border .3s; }
+.calc-select:focus, .calc-input:focus { border-color:var(--gold); outline:none; }
+.calc-select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a9bb5' fill='none' stroke-width='2'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:36px; }
+.calc-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.room-info-box { background:rgba(212,175,55,0.08); border:1px solid var(--gold-dim); border-radius:8px; padding:10px 14px; font-size:0.85rem; color:var(--gold); margin-top:8px; }
+.toggle-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); }
+.toggle-label { font-size:0.85rem; color:var(--text); }
+.toggle-label small { display:block; font-size:0.7rem; color:var(--text-dim); margin-top:2px; }
+.toggle { width:44px; height:24px; background:var(--navy); border:2px solid var(--border); border-radius:12px; cursor:pointer; position:relative; transition:all .3s; flex-shrink:0; margin-left:12px; }
+.toggle::after { content:''; position:absolute; width:18px; height:18px; background:var(--text-dim); border-radius:50%; top:1px; left:1px; transition:all .3s; }
+.toggle.active { background:var(--gold); border-color:var(--gold); }
+.toggle.active::after { left:21px; background:var(--navy); }
+.result-box { background:linear-gradient(135deg, var(--navy-light), rgba(212,175,55,0.08)); border:2px solid var(--gold); border-radius:16px; padding:28px; text-align:center; margin-top:24px; }
+.result-label { font-size:0.8rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+.result-price { font-family:'Playfair Display',serif; font-size:3rem; color:var(--gold); font-weight:700; }
+.result-price .eur { font-size:1.5rem; }
+.result-sub { font-size:0.85rem; color:var(--text-dim); margin-top:4px; }
+.result-per-night { font-size:0.9rem; color:var(--cyan); font-weight:600; margin-top:8px; }
+.breakdown { margin-top:20px; text-align:left; }
+.bd-row { display:flex; justify-content:space-between; padding:6px 0; font-size:0.85rem; border-bottom:1px solid var(--border); }
+.bd-row .lbl { color:var(--text-dim); }
+.bd-row .val { color:var(--white); font-weight:600; }
+.bd-row.bd-total { border-top:2px solid var(--gold); border-bottom:none; margin-top:6px; padding-top:10px; }
+.bd-row.bd-total .lbl, .bd-row.bd-total .val { color:var(--gold); font-weight:700; font-size:1rem; }
+.btn-gold { display:inline-flex; align-items:center; gap:8px; background:var(--gold); color:var(--navy); padding:14px 28px; border-radius:30px; font-weight:700; text-decoration:none; font-size:0.95rem; transition:all .3s; border:none; cursor:pointer; }
+.btn-gold:hover { background:#e8c84a; transform:translateY(-2px); box-shadow:0 8px 25px rgba(212,175,55,0.3); }
+.note { background:rgba(255,255,255,0.03); border-left:3px solid var(--gold); border-radius:8px; padding:14px 18px; font-size:0.85rem; color:var(--text-dim); line-height:1.5; }
+h2.section-title { font-family:'Playfair Display',serif; color:var(--white); font-size:1.6rem; border-bottom:2px solid var(--gold); padding-bottom:0.5rem; margin-bottom:1rem; }
+@media(max-width:600px) {
+  body { padding:12px; }
+  .calc-row { grid-template-columns:1fr; }
+  .room-grid { grid-template-columns:1fr 1fr; }
+  .result-price { font-size:2.2rem; }
+}
+</style>
+</head>
+<body>
+<h2 class="section-title">Tu presupuesto</h2>
+<p style="color:var(--text-dim); margin-bottom:1rem;">
+  Elige habitación, régimen, noches y extras. El precio se calcula al momento. Sin sorpresas.
+</p>
+<h3 style="font-family:'Playfair Display',serif; color:var(--gold); font-size:1.1rem; margin-bottom:10px;">Habitaciones Hotel Sarimanok</h3>
+<div class="room-grid">
+  <div class="room-card"><div class="room-card-img">🏨 Premium</div><div class="room-card-body"><h4>Premium</h4><div class="room-meta">22-25m² · 2 pax · Balcón</div><div class="room-price">desde 71<span>€/noche</span></div><div class="room-features"><span class="room-feat">A/C</span><span class="room-feat">Ventilador</span><span class="room-feat">Balcón</span></div></div></div>
+  <div class="room-card"><div class="room-card-img">🏨 Standard</div><div class="room-card-body"><h4>Standard</h4><div class="room-meta">25-27m² · 2-3 pax · Patio/Piscina</div><div class="room-price">desde 76<span>€/noche</span></div><div class="room-features"><span class="room-feat">A/C</span><span class="room-feat">Piscina</span><span class="room-feat">Patio</span></div></div></div>
+  <div class="room-card"><div class="room-card-img">🏨 Superior</div><div class="room-card-body"><h4>Superior</h4><div class="room-meta">29-35m² · 2-3 pax · Terraza</div><div class="room-price">desde 102<span>€/noche</span></div><div class="room-features"><span class="room-feat">A/C</span><span class="room-feat">Terraza</span><span class="room-feat">Vista</span></div></div></div>
+  <div class="room-card"><div class="room-card-img">🏡 Studio Villa</div><div class="room-card-body"><h4>Studio Superior Villa</h4><div class="room-meta">Villa · 2-3 pax · Piscina</div><div class="room-price">desde 106<span>€/noche</span></div><div class="room-features"><span class="room-feat">Cocina</span><span class="room-feat">Piscina</span><span class="room-feat">Villa</span></div></div></div>
+</div>
+<div class="calc-section" id="calculator">
+  <h3>🧮 Calcula tu precio</h3>
+  <label class="calc-label">Tipo de habitación</label>
+  <select class="calc-select" id="room" onchange="updateCalc()">
+    <optgroup label="HABITACIONES">
+      <option value="hab_pre" data-to="57" data-bb="61" data-info="22-25m² · 2 pax · Balcón calle" data-max="2">Premium — 22-25m²</option>
+      <option value="hab_std" data-to="62" data-bb="66" data-info="25-27m² · 2-3 pax · Patio/Piscina" data-max="3">Standard — 25-27m²</option>
+      <option value="hab_stp" data-to="69" data-bb="73" data-info="29-35m² · 2-3 pax · Patio" data-max="3">Standard+ — 29-35m²</option>
+      <option value="hab_sup" data-to="84" data-bb="88" data-info="29-35m² · 2-3 pax · Terraza" data-max="3">Superior — 29-35m²</option>
+      <option value="hab_fam" data-to="111" data-bb="115" data-info="48m² · 4-5 pax · Terraza" data-max="5">Familiar — 48m²</option>
+    </optgroup>
+    <optgroup label="STUDIOS (con cocina)">
+      <option value="stu_pre" data-to="61" data-bb="65" data-info="24m² · 2 pax · Vista mar · Cocina" data-max="2">Studio Premium — 24m²</option>
+      <option value="stu_std" data-to="66" data-bb="70" data-info="27-40m² · 2-3 pax · Balcón/Jardín · Cocina" data-max="3">Studio Standard — 27-40m²</option>
+      <option value="stu_stp" data-to="73" data-bb="77" data-info="35-40m² · 2-3 pax · Terraza jardín · Cocina" data-max="3">Studio Standard+ — 35-40m²</option>
+      <option value="stu_sup" data-to="88" data-bb="92" data-info="Villa · 2-3 pax · Piscina · Cocina" data-max="3">Studio Superior — Villa</option>
+      <option value="stu_fam" data-to="116" data-bb="120" data-info="48-75m² · 6-7 pax · Piscina+Terraza · Cocina" data-max="7">Studio Familiar — 48-75m²</option>
+    </optgroup>
+  </select>
+  <div class="room-info-box" id="roomInfo">22-25m² · 2 pax · Balcón calle</div>
+  <div class="calc-row" style="margin-top:16px;">
+    <div><label class="calc-label">Noches</label><input type="number" class="calc-input" id="nights" value="7" min="1" max="60" onchange="updateCalc()" oninput="updateCalc()"></div>
+    <div><label class="calc-label">Adultos</label><select class="calc-select" id="adults" onchange="updateCalc()"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
+  </div>
+  <div class="calc-row" style="margin-top:16px;">
+    <div><label class="calc-label">Niños (&lt;12 años)</label><select class="calc-select" id="children" onchange="updateCalc()"><option value="0" selected>0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+    <div><label class="calc-label">Camas extra</label><select class="calc-select" id="extraBeds" onchange="updateCalc()"><option value="0" selected>0</option><option value="1">1</option><option value="2">2</option></select></div>
+  </div>
+  <label class="calc-label" style="margin-top:20px;">Régimen</label>
+  <select class="calc-select" id="regime" onchange="updateCalc()">
+    <option value="ro">Solo alojamiento</option>
+    <option value="bb" selected>Desayuno incluido (BB)</option>
+    <option value="hb">Media pensión (MP)</option>
+    <option value="fb">Pensión completa (PC)</option>
+  </select>
+  <div class="room-info-box" id="regimeInfo" style="margin-top:10px;">Desayuno Clásico incluido en tarifa</div>
+  <h4 style="color:var(--gold); font-size:0.9rem; margin-top:20px; margin-bottom:8px;">Transfers</h4>
+  <div class="toggle-row"><div class="toggle-label">Transfer aeropuerto ida<small>Máx. 4 pax por vehículo</small></div><div class="toggle" id="tAirIn" onclick="tog('tAirIn');updateCalc()"></div></div>
+  <div class="toggle-row"><div class="toggle-label">Transfer aeropuerto vuelta<small>Máx. 4 pax por vehículo</small></div><div class="toggle" id="tAirOut" onclick="tog('tAirOut');updateCalc()"></div></div>
+  <div class="toggle-row"><div class="toggle-label">Transfer puerto ida<small>Máx. 4 pax por vehículo</small></div><div class="toggle" id="tPortIn" onclick="tog('tPortIn');updateCalc()"></div></div>
+  <div class="toggle-row"><div class="toggle-label">Transfer puerto vuelta<small>Máx. 4 pax por vehículo</small></div><div class="toggle" id="tPortOut" onclick="tog('tPortOut');updateCalc()"></div></div>
+</div>
+<div class="result-box" id="resultBox">
+  <div class="result-label">Precio total estimado</div>
+  <div class="result-price" id="totalPrice">0<span class="eur">€</span></div>
+  <div class="result-sub" id="totalSub">7 noches · 2 adultos</div>
+  <div class="result-per-night" id="perNight">0€/noche</div>
+  <div class="breakdown" id="breakdown"></div>
+  <a href="https://wa.me/34619401041?text=Hola%20Giora%2C%20me%20interesa%20Hotel%20Sarimanok%20en%20Nosy%20Be" class="btn-gold" style="width:100%; margin-top:1.5rem; justify-content:center; text-align:center;" target="_blank">Dime y lo montamos →</a>
+</div>
+<div class="note" style="margin-top:1.5rem;">Tarifas orientativas 2025. Precio final sujeto a disponibilidad y fechas exactas. Los studios incluyen cocina equipada — ideal para estancias largas.</div>
+<script>
+const MK = 1.15;
+const MEALS = { hb_a:19, hb_c:13, fb_a:32, fb_c:22 };
+const TRF = { air:24, port:14 };
+const XBED = 12.50;
+
+function getRoom() {
+  const s = document.getElementById('room');
+  const o = s.options[s.selectedIndex];
+  return { to: +o.dataset.to, bb: +o.dataset.bb, info: o.dataset.info, max: +o.dataset.max };
+}
+function tog(id) { document.getElementById(id).classList.toggle('active'); }
+function isOn(id) { return document.getElementById(id).classList.contains('active'); }
+
+function updateCalc() {
+  const r = getRoom();
+  const n = Math.max(1, parseInt(document.getElementById('nights').value) || 1);
+  const a = +document.getElementById('adults').value;
+  const c = +document.getElementById('children').value;
+  const xb = +document.getElementById('extraBeds').value;
+  const reg = document.getElementById('regime').value;
+
+  document.getElementById('roomInfo').innerHTML = '<strong>' + r.info + '</strong>';
+  const regInfo = {
+    ro: 'Studios con cocina — ideal self-catering.',
+    bb: 'Desayuno Clásico incluido en tarifa.',
+    hb: 'Media pensión: desayuno + cena. Restaurante Batumoch.',
+    fb: 'Pensión completa: desayuno + almuerzo + cena.'
+  };
+  document.getElementById('regimeInfo').textContent = regInfo[reg];
+
+  let bd = [];
+  let roomTO = reg === 'ro' ? r.to : r.bb;
+  let roomT = roomTO * n;
+  bd.push({ l: 'Habitación × ' + n + ' noches', v: roomT });
+
+  let mealT = 0;
+  if (reg === 'hb' || reg === 'fb') {
+    let ma = reg === 'hb' ? MEALS.hb_a : MEALS.fb_a;
+    let mc = reg === 'hb' ? MEALS.hb_c : MEALS.fb_c;
+    let ml = reg === 'hb' ? 'Media pensión' : 'Pensión completa';
+    let maT = ma * a * n, mcT = mc * c * n;
+    mealT = maT + mcT;
+    if (a > 0) bd.push({ l: ml + ' × ' + a + ' adulto(s) × ' + n + 'n', v: maT });
+    if (c > 0) bd.push({ l: ml + ' × ' + c + ' niño(s) × ' + n + 'n', v: mcT });
+  }
+
+  let xbT = XBED * xb * n;
+  if (xb > 0) bd.push({ l: 'Cama extra × ' + xb + ' × ' + n + 'n', v: xbT });
+
+  let trfT = 0;
+  const pax = a + c;
+  const veh = Math.ceil(pax / 4);
+  if (isOn('tAirIn'))  { let x = TRF.air * veh; trfT += x; bd.push({ l: 'Transfer aero ida (×' + veh + ')', v: x }); }
+  if (isOn('tAirOut')) { let x = TRF.air * veh; trfT += x; bd.push({ l: 'Transfer aero vuelta (×' + veh + ')', v: x }); }
+  if (isOn('tPortIn')) { let x = TRF.port * veh; trfT += x; bd.push({ l: 'Transfer puerto ida (×' + veh + ')', v: x }); }
+  if (isOn('tPortOut')){ let x = TRF.port * veh; trfT += x; bd.push({ l: 'Transfer puerto vuelta (×' + veh + ')', v: x }); }
+
+  let totalTO = roomT + mealT + xbT + trfT;
+  let totalPVP = Math.round(totalTO * MK);
+  let ppn = Math.round(totalPVP / n);
+
+  document.getElementById('totalPrice').innerHTML = totalPVP.toLocaleString('es-ES') + '<span class="eur">€</span>';
+  document.getElementById('totalSub').textContent = n + ' noche' + (n>1?'s':'') + ' · ' + a + ' adulto' + (a>1?'s':'') + (c>0 ? ' · ' + c + ' niño' + (c>1?'s':'') : '');
+  document.getElementById('perNight').textContent = ppn + '€ / noche';
+
+  let h = '';
+  bd.forEach(b => {
+    let v = Math.round(b.v * MK);
+    h += '<div class="bd-row"><span class="lbl">' + b.l + '</span><span class="val">' + v.toLocaleString('es-ES') + '€</span></div>';
+  });
+  h += '<div class="bd-row bd-total"><span class="lbl">TOTAL</span><span class="val">' + totalPVP.toLocaleString('es-ES') + '€</span></div>';
+  document.getElementById('breakdown').innerHTML = h;
+
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'scibasku-calc-height', height: document.body.scrollHeight + 40 }, '*');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', updateCalc);
+</script>
+</body>
+</html>
